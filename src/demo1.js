@@ -1,10 +1,11 @@
 import React, {Component} from 'react';
 import axios from 'axios';
 import {Table, Input, Button} from 'antd';
+
 export default class DefaultTable extends Component {
     constructor(props, context) {
         super(props, context);
-        this.state={
+        this.state = {
             pageParm: {     //数据请求 分页信息
                 pageSize: '10',
                 pageNumber: "1",
@@ -15,8 +16,8 @@ export default class DefaultTable extends Component {
                 showQuickJumper: true,
                 pageSizeOptions: ["5", "10", "15", "25", "50"],
                 showSizeChanger: true,
-                onChange:this.onPaginationChange,
-                onShowSizeChange:this.onPaginationShowSizeChange,
+                onChange: this.onPaginationChange,
+                onShowSizeChange: this.onPaginationShowSizeChange,
                 showTotal: (total) => `Total ${total} item`
             },
             loading: false,//表格是否加载
@@ -25,7 +26,6 @@ export default class DefaultTable extends Component {
 
     componentWillMount = () => {
         this.ajaxData();
-        const {pagination} = this.state;
     }
     //请求表格数据，并刷新
     ajaxData = (pageParm = this.state.pageParm) => {
@@ -44,6 +44,7 @@ export default class DefaultTable extends Component {
             }
         }, (err) => {
             console.log(err);
+            this.setState({loading: false})
         });
     }
 
@@ -62,20 +63,20 @@ export default class DefaultTable extends Component {
         pageParm.pageNumber = page;
         pagination.current = page;
 
-        this.setState({loading: true, pageParm, pagination});
+        this.setState({pageParm, pagination});
         this.ajaxData(pageParm);
     }
 
     //pageSize 变化的回调
     onPaginationShowSizeChange = (current, size) => {
         const {pageParm, pagination} = {...this.state};
-
+        //切换每页显示多少条记录的时候，重置为第一页。重新排版 table
         pageParm.pageSize = size;
         pageParm.pageNumber = 1;
 
         pagination.current = 1;
 
-        this.setState({loading: true, pageParm, pagination});
+        this.setState({pageParm, pagination});
         this.ajaxData(pageParm);
     }
 

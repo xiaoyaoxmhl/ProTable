@@ -17,14 +17,15 @@ export default class Demo extends React.Component {
         }
     }
 
+    //关键字
     handleInputChange = (e) => {
         const pageParm = this.state.pageParm;
         pageParm.keyWord = e.target.value;
         this.setState({pageParm});
     }
-
+    //搜索按钮
     search = () => {
-        this.table.ajaxData()
+        this.table.ajaxData({...this.state.pageParm})
     }
 
     render() {

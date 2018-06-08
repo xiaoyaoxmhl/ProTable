@@ -32,7 +32,7 @@ export default class ProTable extends React.PureComponent {
     componentWillMount = () => {
         if (!this.props.url) return;
         this.ajaxData(this.state.pageParm);
-
+        //重置pagination的 change 事件
         const {pagination} = this.state;
         pagination.onChange = this.onPaginationChange
         pagination.onShowSizeChange = this.onPaginationShowSizeChange
@@ -46,14 +46,14 @@ export default class ProTable extends React.PureComponent {
         const nextPageParm = {...nextProps.pageParm};
         let nextPagination = {...nextProps.pagination};
 
-        //对比新旧 props，并更新
-        if (Object.keys(nextPageParm).find(val => nextPageParm[val] !== thisPageParm[val])) {
+
+       /* if (Object.keys(nextPageParm).find(val => nextPageParm[val] !== thisPageParm[val])) {
+            nextPageParm.pageNumber = 1;
             this.setState({
                 pageParm: nextPageParm,
             });
-            this.ajaxData(nextPageParm);
-        }
-
+        }*/
+        //对比新旧 props，并更新
         if (Object.keys(nextPagination).find(val => nextPagination[val] !== thisPagination[val])) {
             delete  nextPagination.onChange;
             delete  nextPagination.onShowSizeChange;
@@ -63,13 +63,32 @@ export default class ProTable extends React.PureComponent {
         }
     }
 
+    //在用户调用ajaxData方法的时候，这个时候父组件的pageParm如果和子组件的pageParm存在差异。
+    //需要对子组件this.state.pageParm更新，重置。
+    updateParm = (pageParm) => {
+        const thisPageParm = this.state.pageParm;
+        const parentPageParm = {...pageParm};
+        if (Object.keys(thisPageParm).find(val => thisPageParm[val] !== pageParm[val])) {
+            pageParm.pageNumber = 1;
+            const pagination = {...this.state.pagination};
+            pagination.current = 1;
+            this.setState({
+                pageParm: parentPageParm,
+                pagination
+            });
+        }
+    }
+
     //请求表格数据，并刷新
     ajaxData = pageParm => {
+        //接受参数pageParm ，允许 pagination 调用当前函数，自行更新分页请求
         if (!pageParm) {
             pageParm = this.props.pageParm || {     //数据请求 分页信息
                 pageSize: '10',
                 pageNumber: "1",
             }
+        } else {
+            this.updateParm(pageParm);
         }
         this.setState({loading: true});
 
@@ -82,12 +101,12 @@ export default class ProTable extends React.PureComponent {
                     }));
 
                 const {pagination} = this.state;
-                console.log(this.state);
                 pagination.total = total;
                 this.setState({dataSource, pagination, loading: false});
             }
         }, (err) => {
             console.log(err);
+            this.setState({loading: false})
         });
     }
 
@@ -98,7 +117,7 @@ export default class ProTable extends React.PureComponent {
         pageParm.pageNumber = page;
         pagination.current = page;
 
-        this.setState({loading: true, pageParm, pagination});
+        this.setState({pageParm, pagination});
         this.ajaxData(pageParm);
         //调用父组件 回调函数
         const {onChange} = this.props;
@@ -114,7 +133,7 @@ export default class ProTable extends React.PureComponent {
 
         pagination.current = 1;
 
-        this.setState({loading: true, pageParm, pagination});
+        this.setState({pageParm, pagination});
         this.ajaxData(pageParm);
     }
 
