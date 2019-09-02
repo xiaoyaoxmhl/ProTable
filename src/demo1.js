@@ -67,6 +67,7 @@ export default class DefaultTable extends Component {
         this.ajaxData(pageParm);
     }
 
+
     //pageSize 变化的回调
     onPaginationShowSizeChange = (current, size) => {
         const {pageParm, pagination} = {...this.state};
